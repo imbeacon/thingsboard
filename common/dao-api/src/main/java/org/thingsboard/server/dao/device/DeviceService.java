@@ -28,6 +28,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DeviceService {
 
@@ -82,5 +83,7 @@ public interface DeviceService {
     ListenableFuture<List<EntitySubtype>> findDeviceTypesByTenantId(TenantId tenantId);
 
     Device assignDeviceToTenant(TenantId tenantId, Device device);
+
+    Device findDeviceByTenantIdAndProvisionCredentialsPair(TenantId tenantId, String provisionDeviceKey, String provisionDeviceSecret);
 
 }

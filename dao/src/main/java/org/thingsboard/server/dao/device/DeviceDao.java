@@ -217,4 +217,6 @@ public interface DeviceDao extends Dao<Device> {
 
     Optional<Device> findDeviceByProfileNameAndDeviceDataProvisionConfigurationPair(String profileName, String provisionDeviceKey, String provisionDeviceSecret);
 
+    Optional<Device> findDeviceByTenantIdAndDeviceDataProvisionConfigurationPair(TenantId tenantId, String provisionDeviceKey, String provisionDeviceSecret);
+
 }

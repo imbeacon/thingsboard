@@ -144,6 +144,14 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         }
     }
 
+    @Override
+    public Device findDeviceByTenantIdAndProvisionCredentialsPair(TenantId tenantId, String provisionDeviceKey, String provisionDeviceSecret) {
+        log.trace("Executing findDeviceByTenantIdAndProvisionCredentialsPair [{}][{}][{}]", tenantId, provisionDeviceKey, provisionDeviceSecret);
+        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
+        Optional<Device> deviceOpt = deviceDao.findDeviceByTenantIdAndDeviceDataProvisionConfigurationPair(tenantId, provisionDeviceKey, provisionDeviceSecret);
+        return deviceOpt.orElse(null);
+    }
+
     @Cacheable(cacheNames = DEVICE_CACHE, key = "{#tenantId, #name}")
     @Override
     public Device findDeviceByTenantIdAndName(TenantId tenantId, String name) {

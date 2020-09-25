@@ -33,10 +33,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.rule.engine.api.MailService;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.oauth2.OAuth2ClientInfo;
 import org.thingsboard.server.common.data.security.UserCredentials;
@@ -228,6 +230,14 @@ public class AuthController extends BaseController {
                     mailService.sendAccountActivatedEmail(loginUrl, email);
                 } catch (Exception e) {
                     log.info("Unable to send account activation email [{}]", e.getMessage());
+                }
+            }
+
+            JsonNode provisionInformation = user.getAdditionalInfo().get("provision");
+            if (provisionInformation != null) {
+                Device device = deviceService.findDeviceByTenantIdAndProvisionCredentialsPair(user.getTenantId(), provisionInformation.get("provisionDeviceKey").asText(), provisionInformation.get("provisionDeviceSecret").asText());
+                if (device != null && device.getCustomerId().equals(new CustomerId(CustomerId.NULL_UUID))) {
+                    deviceService.assignDeviceToCustomer(user.getTenantId(), device.getId(), user.getCustomerId());
                 }
             }
 

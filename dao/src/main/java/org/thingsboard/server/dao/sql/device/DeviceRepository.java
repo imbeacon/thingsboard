@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 
@@ -175,6 +176,15 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "AND d.type = :profileName",
             nativeQuery = true)
     DeviceEntity findDeviceByProfileNameAndDeviceDataProvisionConfigurationPair(@Param("profileName") String profileName,
+                                                                                @Param("provisionDeviceKey") String provisionDeviceKey,
+                                                                                @Param("provisionDeviceSecret") String provisionDeviceSecret);
+
+    @Query(value = "SELECT * FROM Device as d " +
+            "WHERE d.device_data->'configuration'->>'provisionDeviceKey' = :provisionDeviceKey " +
+            "AND d.device_data->'configuration'->>'provisionDeviceSecret' = :provisionDeviceSecret " +
+            "AND d.tenant_id = :tenantId",
+            nativeQuery = true)
+    DeviceEntity findDeviceByTenantIdAndDeviceDataProvisionConfigurationPair(@Param("tenantId") UUID tenantId,
                                                                                 @Param("provisionDeviceKey") String provisionDeviceKey,
                                                                                 @Param("provisionDeviceSecret") String provisionDeviceSecret);
 }

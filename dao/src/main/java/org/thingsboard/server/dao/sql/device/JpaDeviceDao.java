@@ -224,6 +224,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return Optional.ofNullable(DaoUtil.getData(deviceRepository.findDeviceByProfileNameAndDeviceDataProvisionConfigurationPair(profileName, provisionDeviceKey, provisionDeviceSecret)));
     }
 
+    @Override
+    public Optional<Device> findDeviceByTenantIdAndDeviceDataProvisionConfigurationPair(TenantId tenantId, String provisionDeviceKey, String provisionDeviceSecret) {
+        return Optional.ofNullable(DaoUtil.getData(deviceRepository.findDeviceByTenantIdAndDeviceDataProvisionConfigurationPair(tenantId.getId(), provisionDeviceKey, provisionDeviceSecret)));
+    }
+
     private List<EntitySubtype> convertTenantDeviceTypesToDto(UUID tenantId, List<String> types) {
         List<EntitySubtype> list = Collections.emptyList();
         if (types != null && !types.isEmpty()) {
