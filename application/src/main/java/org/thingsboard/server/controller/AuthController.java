@@ -233,14 +233,6 @@ public class AuthController extends BaseController {
                 }
             }
 
-            JsonNode provisionInformation = user.getAdditionalInfo().get("provision");
-            if (provisionInformation != null) {
-                Device device = deviceService.findDeviceByTenantIdAndProvisionCredentialsPair(user.getTenantId(), provisionInformation.get("provisionDeviceKey").asText(), provisionInformation.get("provisionDeviceSecret").asText());
-                if (device != null && device.getCustomerId().equals(new CustomerId(CustomerId.NULL_UUID))) {
-                    deviceService.assignDeviceToCustomer(user.getTenantId(), device.getId(), user.getCustomerId());
-                }
-            }
-
             JwtToken accessToken = tokenFactory.createAccessJwtToken(securityUser);
             JwtToken refreshToken = refreshTokenRepository.requestRefreshToken(securityUser);
 
