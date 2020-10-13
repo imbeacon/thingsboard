@@ -94,6 +94,14 @@
         <mat-label translate>device.label</mat-label>
         <input matInput formControlName="label">
       </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device.provision-device-key</mat-label>
+        <input matInput formControlName="provisionDeviceKey" required>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device.provision-device-secret</mat-label>
+        <input matInput formControlName="provisionDeviceSecret" required>
+      </mat-form-field>
       <tb-device-data
         formControlName="deviceData"
         required>

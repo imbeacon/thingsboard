@@ -153,6 +153,9 @@ public class ModelConstants {
     public static final String DEVICE_ADDITIONAL_INFO_PROPERTY = ADDITIONAL_INFO_PROPERTY;
     public static final String DEVICE_DEVICE_PROFILE_ID_PROPERTY = "device_profile_id";
     public static final String DEVICE_DEVICE_DATA_PROPERTY = "device_data";
+    public static final String DEVICE_PROVISION_DEVICE_KEY = "provision_device_key";
+    public static final String DEVICE_PROVISION_DEVICE_SECRET = "provision_device_secret";
+
 
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
     public static final String DEVICE_BY_TENANT_BY_TYPE_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_by_type_and_search_text";

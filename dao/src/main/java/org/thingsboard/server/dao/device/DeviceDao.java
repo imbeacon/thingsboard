@@ -197,6 +197,15 @@ public interface DeviceDao extends Dao<Device> {
 
     /**
      * Find devices by tenantId and device id.
+     * @param provisionDeviceKey the provision device key
+     * @param provisionDeviceSecret the provision device secret
+     * @return the device object
+     */
+
+    Device findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(String provisionDeviceKey, String provisionDeviceSecret);
+
+    /**
+     * Find devices by tenantId and device id.
      * @param tenantId tenantId the tenantId
      * @param id the deviceId
      * @return the device object

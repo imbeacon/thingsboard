@@ -210,6 +210,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
+    public Device findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(String provisionDeviceKey, String provisionDeviceSecret) {
+        return  Optional.ofNullable(DaoUtil.getData(deviceRepository.findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(provisionDeviceKey, provisionDeviceSecret))).orElse(null);
+    }
+
+    @Override
     public ListenableFuture<Device> findDeviceByTenantIdAndIdAsync(TenantId tenantId, UUID id) {
         return service.submit(() -> DaoUtil.getData(deviceRepository.findByTenantIdAndId(tenantId.getId(), id)));
     }

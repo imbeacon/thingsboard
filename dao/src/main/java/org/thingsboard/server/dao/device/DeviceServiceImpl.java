@@ -128,6 +128,12 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     @Override
+    public Device findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(String provisionDeviceKey, String provisionDeviceSecret) {
+        log.trace("Executing findDeviceByProvisionDeviceKeyAndSecret [{}] [{}]", provisionDeviceKey, provisionDeviceSecret);
+        return deviceDao.findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(provisionDeviceKey, provisionDeviceSecret);
+    }
+
+    @Override
     public Device findDeviceById(TenantId tenantId, DeviceId deviceId) {
         log.trace("Executing findDeviceById [{}]", deviceId);
         validateId(deviceId, INCORRECT_DEVICE_ID + deviceId);

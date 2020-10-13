@@ -117,6 +117,11 @@ public class DeviceProvisionServiceImpl implements DeviceProvisionService {
         if (StringUtils.isEmpty(provisionRequestKey) || StringUtils.isEmpty(provisionRequestSecret)) {
             throw new ProvisionFailedException(ProvisionResponseStatus.NOT_FOUND.name());
         }
+        Device deviceForProvision = deviceService.findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(provisionRequestKey, provisionRequestSecret);
+
+        if (deviceForProvision != null) {
+            return processProvision(deviceForProvision, provisionRequest);
+        }
 
         DeviceProfile targetProfile = deviceProfileDao.findByProvisionDeviceKey(provisionRequestKey);
 

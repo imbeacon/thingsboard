@@ -35,6 +35,8 @@ public interface DeviceService {
 
     DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId);
 
+    Device findDeviceByProvisionDeviceKeyAndProvisionDeviceSecret(String provisionDeviceKey, String provisionDeviceSecret);
+
     Device findDeviceById(TenantId tenantId, DeviceId deviceId);
 
     ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId);

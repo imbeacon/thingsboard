@@ -87,7 +87,9 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
             gateway: [entity && entity.additionalInfo ? entity.additionalInfo.gateway : false],
             description: [entity && entity.additionalInfo ? entity.additionalInfo.description : ''],
           }
-        )
+        ),
+        provisionDeviceKey: [entity ? entity.provisionDeviceKey: null],
+        provisionDeviceSecret: [entity ? entity.provisionDeviceSecret: null]
       }
     );
   }
@@ -100,6 +102,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.entityForm.patchValue({additionalInfo:
         {gateway: entity.additionalInfo ? entity.additionalInfo.gateway : false}});
     this.entityForm.patchValue({additionalInfo: {description: entity.additionalInfo ? entity.additionalInfo.description : ''}});
+    this.entityForm.patchValue({provisionDeviceKey: entity.provisionDeviceKey});
+    this.entityForm.patchValue({provisionDeviceSecret: entity.provisionDeviceSecret});
   }
 
 

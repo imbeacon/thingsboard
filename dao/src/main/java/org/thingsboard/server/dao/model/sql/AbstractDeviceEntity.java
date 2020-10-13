@@ -66,6 +66,12 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     @Column(name = ModelConstants.SEARCH_TEXT_PROPERTY)
     private String searchText;
 
+    @Column(name = ModelConstants.DEVICE_PROVISION_DEVICE_KEY)
+    private String provisionDeviceKey;
+
+    @Column(name = ModelConstants.DEVICE_PROVISION_DEVICE_SECRET)
+    private String provisionDeviceSecret;
+
     @Type(type = "json")
     @Column(name = ModelConstants.DEVICE_ADDITIONAL_INFO_PROPERTY)
     private JsonNode additionalInfo;
@@ -99,6 +105,8 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.name = device.getName();
         this.type = device.getType();
         this.label = device.getLabel();
+        this.provisionDeviceKey = device.getProvisionDeviceKey();
+        this.provisionDeviceSecret = device.getProvisionDeviceSecret();
         this.additionalInfo = device.getAdditionalInfo();
     }
 
@@ -113,6 +121,8 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.name = deviceEntity.getName();
         this.label = deviceEntity.getLabel();
         this.searchText = deviceEntity.getSearchText();
+        this.provisionDeviceKey = deviceEntity.getProvisionDeviceKey();
+        this.provisionDeviceSecret = deviceEntity.getProvisionDeviceSecret();
         this.additionalInfo = deviceEntity.getAdditionalInfo();
     }
 
@@ -143,6 +153,8 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         device.setType(type);
         device.setLabel(label);
         device.setAdditionalInfo(additionalInfo);
+        device.setProvisionDeviceKey(provisionDeviceKey);
+        device.setProvisionDeviceSecret(provisionDeviceSecret);
         return device;
     }
 

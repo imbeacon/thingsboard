@@ -42,6 +42,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private String label;
     private DeviceProfileId deviceProfileId;
     private transient DeviceData deviceData;
+    private String provisionDeviceKey;
+    private String provisionDeviceSecret;
     @JsonIgnore
     private byte[] deviceDataBytes;
 
@@ -62,6 +64,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.label = device.getLabel();
         this.deviceProfileId = device.getDeviceProfileId();
         this.setDeviceData(device.getDeviceData());
+        this.provisionDeviceKey = device.getProvisionDeviceKey();
+        this.provisionDeviceSecret = device.getProvisionDeviceSecret();
     }
 
     public TenantId getTenantId() {
@@ -113,6 +117,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.deviceProfileId = deviceProfileId;
     }
 
+    public String getProvisionDeviceKey() { return provisionDeviceKey; }
+
+    public void setProvisionDeviceKey(String provisionDeviceKey) { this.provisionDeviceKey = provisionDeviceKey; }
+
+    public String getProvisionDeviceSecret() { return provisionDeviceSecret; }
+
+    public void setProvisionDeviceSecret(String provisionDeviceSecret) { this.provisionDeviceSecret = provisionDeviceSecret; }
+
     public DeviceData getDeviceData() {
         if (deviceData != null) {
             return deviceData;
@@ -162,6 +174,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         builder.append(deviceProfileId);
         builder.append(", deviceData=");
         builder.append(deviceData);
+        builder.append(", provisionDeviceKey=");
+        builder.append(provisionDeviceKey);
+        builder.append(", provisionDeviceSecret=");
+        builder.append(provisionDeviceSecret);
         builder.append(", additionalInfo=");
         builder.append(getAdditionalInfo());
         builder.append(", createdTime=");

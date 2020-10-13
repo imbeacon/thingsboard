@@ -381,6 +381,8 @@ export interface Device extends BaseData<DeviceId> {
   deviceProfileId?: DeviceProfileId;
   deviceData?: DeviceData;
   additionalInfo?: any;
+  provisionDeviceKey?: string;
+  provisionDeviceSecret?: string;
 }
 
 export interface DeviceInfo extends Device {

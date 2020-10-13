@@ -834,7 +834,9 @@
             "specific-configuration": "Specific configuration",
             "customer-to-assign-device": "Customer to assign the device",
             "add-credential": "Add credential"
-        }
+        },
+        "provision-device-key": "Provision device key",
+        "provision-device-secret": "Provision device secret"
     },
     "device-profile": {
         "device-profile": "Device profile",
