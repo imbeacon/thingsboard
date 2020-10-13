@@ -203,7 +203,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             ConstraintViolationException e = extractConstraintViolationException(t).orElse(null);
             if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("device_name_unq_key")) {
                 throw new DataValidationException("Device with such name already exists!");
-            } else if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("device_provision_key_unq_key")) {
+            } else if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("device_provision_device_key_key")) {
                 throw new DataValidationException("Device with such provision device key already exists!");
             } else {
                 throw t;
