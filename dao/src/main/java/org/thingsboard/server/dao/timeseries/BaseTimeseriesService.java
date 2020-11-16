@@ -40,7 +40,6 @@ import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.service.Validator;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -119,9 +118,7 @@ public class BaseTimeseriesService implements TimeseriesService {
     @Override
     public ListenableFuture<Integer> save(TenantId tenantId, EntityId entityId, TsKvEntry tsKvEntry) {
         validate(entityId);
-        if (tsKvEntry == null) {
-            throw new IncorrectParameterException("Key value entry can't be null");
-        }
+        validate(tsKvEntry);
         List<ListenableFuture<Integer>> futures = Lists.newArrayListWithExpectedSize(INSERTS_PER_ENTRY);
         saveAndRegisterFutures(tenantId, futures, entityId, tsKvEntry, 0L);
         return Futures.transform(Futures.allAsList(futures), SUM_ALL_INTEGERS, MoreExecutors.directExecutor());
@@ -131,9 +128,7 @@ public class BaseTimeseriesService implements TimeseriesService {
     public ListenableFuture<Integer> save(TenantId tenantId, EntityId entityId, List<TsKvEntry> tsKvEntries, long ttl) {
         List<ListenableFuture<Integer>> futures = Lists.newArrayListWithExpectedSize(tsKvEntries.size() * INSERTS_PER_ENTRY);
         for (TsKvEntry tsKvEntry : tsKvEntries) {
-            if (tsKvEntry == null) {
-                throw new IncorrectParameterException("Key value entry can't be null");
-            }
+            validate(tsKvEntry);
             saveAndRegisterFutures(tenantId, futures, entityId, tsKvEntry, ttl);
         }
         return Futures.transform(Futures.allAsList(futures), SUM_ALL_INTEGERS, MoreExecutors.directExecutor());
@@ -143,9 +138,7 @@ public class BaseTimeseriesService implements TimeseriesService {
     public ListenableFuture<List<Void>> saveLatest(TenantId tenantId, EntityId entityId, List<TsKvEntry> tsKvEntries) {
         List<ListenableFuture<Void>> futures = Lists.newArrayListWithExpectedSize(tsKvEntries.size());
         for (TsKvEntry tsKvEntry : tsKvEntries) {
-            if (tsKvEntry == null) {
-                throw new IncorrectParameterException("Key value entry can't be null");
-            }
+            validate(tsKvEntry);
             futures.add(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry));
         }
         return Futures.allAsList(futures);
@@ -247,6 +240,14 @@ public class BaseTimeseriesService implements TimeseriesService {
             throw new IncorrectParameterException("DeleteTsKvQuery can't be null");
         } else if (isBlank(query.getKey())) {
             throw new IncorrectParameterException("Incorrect DeleteTsKvQuery. Key can't be empty");
+        }
+    }
+
+    private static void validate(TsKvEntry tsKvEntry) {
+        if (tsKvEntry == null) {
+            throw new IncorrectParameterException("TsKvEntry can't be null");
+        } else if (isBlank(tsKvEntry.getKey())) {
+            throw new IncorrectParameterException("Incorrect TsKvEntry. Key can't be empty");
         }
     }
 }

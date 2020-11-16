@@ -46,7 +46,7 @@ public class Validator {
      * @param errorMessage the error message for exception
      */
     public static void validateString(String val, String errorMessage) {
-        if (val == null || val.isEmpty()) {
+        if (val == null || val.isEmpty() || val.trim().length() == 0) {
             throw new IncorrectParameterException(errorMessage);
         }
     }

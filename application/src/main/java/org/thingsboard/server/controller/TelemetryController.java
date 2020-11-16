@@ -95,6 +95,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * Created by ashvayka on 22.03.18.
  */
@@ -205,7 +207,7 @@ public class TelemetryController extends BaseController {
             @RequestParam(name = "interval", defaultValue = "0") Long interval,
             @RequestParam(name = "limit", defaultValue = "100") Integer limit,
             @RequestParam(name = "agg", defaultValue = "NONE") String aggStr,
-            @RequestParam(name= "orderBy", defaultValue = "DESC") String orderBy,
+            @RequestParam(name = "orderBy", defaultValue = "DESC") String orderBy,
             @RequestParam(name = "useStrictDataTypes", required = false, defaultValue = "false") Boolean useStrictDataTypes) throws ThingsboardException {
         return accessValidator.validateEntityAndCallback(getCurrentUser(), Operation.READ_TELEMETRY, entityType, entityIdStr,
                 (result, tenantId, entityId) -> {
@@ -392,8 +394,8 @@ public class TelemetryController extends BaseController {
             if (attributes.isEmpty()) {
                 return getImmediateDeferredResult("No attributes data found in request body!", HttpStatus.BAD_REQUEST);
             }
-            for (AttributeKvEntry attributeKvEntry: attributes) {
-                if (attributeKvEntry.getKey().isEmpty() || attributeKvEntry.getKey().trim().length() == 0) {
+            for (AttributeKvEntry attributeKvEntry : attributes) {
+                if (isBlank(attributeKvEntry.getKey())) {
                     return getImmediateDeferredResult("Key cannot be empty or contains only spaces", HttpStatus.BAD_REQUEST);
                 }
             }
@@ -434,6 +436,9 @@ public class TelemetryController extends BaseController {
         List<TsKvEntry> entries = new ArrayList<>();
         for (Map.Entry<Long, List<KvEntry>> entry : telemetryRequest.entrySet()) {
             for (KvEntry kv : entry.getValue()) {
+                if (isBlank(kv.getKey())) {
+                    return getImmediateDeferredResult("Key cannot be empty or contains only spaces", HttpStatus.BAD_REQUEST);
+                }
                 entries.add(new BasicTsKvEntry(entry.getKey(), kv));
             }
         }
