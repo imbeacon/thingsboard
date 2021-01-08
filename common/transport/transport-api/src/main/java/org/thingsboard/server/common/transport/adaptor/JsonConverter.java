@@ -571,6 +571,7 @@ public class JsonConverter {
                 .setProvisionDeviceCredentialsMsg(buildProvisionDeviceCredentialsMsg(
                         getStrValue(jo, DataConstants.PROVISION_KEY, true),
                         getStrValue(jo, DataConstants.PROVISION_SECRET, true)))
+                .setIsGateway(jo.has(DataConstants.IS_GATEWAY) ? jo.get(DataConstants.IS_GATEWAY).getAsBoolean() : Boolean.FALSE)
                 .build();
     }
 

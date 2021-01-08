@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.thingsboard.server.common.data.Customer;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -486,6 +488,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         device.setName(provisionRequest.getDeviceName());
         device.setType(profile.getName());
         device.setTenantId(profile.getTenantId());
+        if (provisionRequest.getIsGateway()) {
+            ObjectNode additionalInfo = JacksonUtil.newObjectNode();
+            additionalInfo.put(DataConstants.IS_GATEWAY, provisionRequest.getIsGateway());
+            device.setAdditionalInfo(additionalInfo);
+        }
         Device savedDevice = saveDevice(device);
         if (!StringUtils.isEmpty(provisionRequest.getCredentialsData().getToken()) ||
                 !StringUtils.isEmpty(provisionRequest.getCredentialsData().getX509CertHash()) ||
@@ -528,7 +535,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
                 @Override
                 protected void validateCreate(TenantId tenantId, Device device) {
                     DefaultTenantProfileConfiguration profileConfiguration =
-                            (DefaultTenantProfileConfiguration)tenantProfileCache.get(tenantId).getProfileData().getConfiguration();
+                            (DefaultTenantProfileConfiguration) tenantProfileCache.get(tenantId).getProfileData().getConfiguration();
                     long maxDevices = profileConfiguration.getMaxDevices();
                     validateNumberOfEntitiesPerTenant(tenantId, deviceDao, maxDevices, EntityType.DEVICE);
                 }

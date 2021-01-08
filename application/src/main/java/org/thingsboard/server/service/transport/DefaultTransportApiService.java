@@ -295,7 +295,8 @@ public class DefaultTransportApiService implements TransportApiService {
                                     requestMsg.getCredentialsDataProto().getValidateDeviceX509CertRequestMsg().getHash()),
                             new ProvisionDeviceProfileCredentials(
                                     requestMsg.getProvisionDeviceCredentialsMsg().getProvisionDeviceKey(),
-                                    requestMsg.getProvisionDeviceCredentialsMsg().getProvisionDeviceSecret()))));
+                                    requestMsg.getProvisionDeviceCredentialsMsg().getProvisionDeviceSecret()),
+                            requestMsg.getIsGateway())));
         } catch (ProvisionFailedException e) {
             return Futures.immediateFuture(getTransportApiResponseMsg(
                     new DeviceCredentials(),
