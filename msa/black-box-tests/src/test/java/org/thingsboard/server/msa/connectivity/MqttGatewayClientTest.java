@@ -77,7 +77,7 @@ public class MqttGatewayClientTest extends AbstractContainerTest {
     @BeforeMethod
     public void createGateway() throws Exception {
         testRestClient.login("tenant@thingsboard.org", "tenant");
-        gatewayDevice = testRestClient.postDevice("", defaultGatewayPrototype());
+        gatewayDevice = testRestClient.postDevice(defaultGatewayPrototype());
         DeviceCredentials gatewayDeviceCredentials = testRestClient.getDeviceCredentialsByDeviceId(gatewayDevice.getId());
 
         this.listener = new MqttMessageListener();

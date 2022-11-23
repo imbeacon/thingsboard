@@ -17,6 +17,7 @@ package org.thingsboard.server.msa;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.restassured.RestAssured;
+import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.config.HeaderConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -25,10 +26,16 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.MultiPartSpecification;
 import io.restassured.specification.RequestSpecification;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.DeviceProfile;
+import org.thingsboard.server.common.data.OtaPackage;
+import org.thingsboard.server.common.data.OtaPackageInfo;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
+import org.thingsboard.server.common.data.id.OtaPackageId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -38,6 +45,7 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainMetaData;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,17 +84,25 @@ public class TestRestClient {
         loginRequest.put("password", password);
 
         JsonPath jsonPath = given().spec(requestSpec).body(loginRequest)
-                .post( "/api/auth/login")
+                .post("/api/auth/login")
                 .getBody().jsonPath();
         token = jsonPath.get("token");
         refreshToken = jsonPath.get("refreshToken");
         requestSpec.header(JWT_TOKEN_HEADER_PARAM, "Bearer " + token);
     }
 
-    public Device postDevice(String accessToken, Device device) {
-        return  given().spec(requestSpec).body(device)
-                .pathParams("accessToken", accessToken)
-                .post("/api/device?accessToken={accessToken}")
+    public Device postDevice(Device device) {
+        return given().spec(requestSpec).body(device)
+                .post("/api/device")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(Device.class);
+    }
+
+    public Device getDeviceByName(String deviceName) {
+        return given().spec(requestSpec).pathParam("deviceName", deviceName)
+                .get("/api/tenant/devices?deviceName={deviceName}")
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()
@@ -94,62 +110,65 @@ public class TestRestClient {
     }
 
     public ValidatableResponse getDeviceById(DeviceId deviceId, int statusCode) {
-        return  given().spec(requestSpec)
+        return given().spec(requestSpec)
                 .pathParams("deviceId", deviceId.getId())
                 .get("/api/device/{deviceId}")
                 .then()
                 .statusCode(statusCode);
     }
+
     public Device getDeviceById(DeviceId deviceId) {
-        return  getDeviceById(deviceId, HTTP_OK)
+        return getDeviceById(deviceId, HTTP_OK)
                 .extract()
                 .as(Device.class);
     }
+
     public DeviceCredentials getDeviceCredentialsByDeviceId(DeviceId deviceId) {
         return given().spec(requestSpec).get("/api/device/{deviceId}/credentials", deviceId.getId())
-                    .then()
-                    .assertThat()
-                    .statusCode(HTTP_OK)
-                    .extract()
-                    .as(DeviceCredentials.class);
+                .then()
+                .assertThat()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(DeviceCredentials.class);
     }
 
     public ValidatableResponse postTelemetry(String credentialsId, JsonNode telemetry) {
-         return  given().spec(requestSpec).body(telemetry)
-                 .post("/api/v1/{credentialsId}/telemetry", credentialsId)
-                 .then()
-                 .statusCode(HTTP_OK);
+        return given().spec(requestSpec).body(telemetry)
+                .post("/api/v1/{credentialsId}/telemetry", credentialsId)
+                .then()
+                .statusCode(HTTP_OK);
     }
 
     public ValidatableResponse deleteDevice(DeviceId deviceId) {
-        return  given().spec(requestSpec)
+        return given().spec(requestSpec)
                 .delete("/api/device/{deviceId}", deviceId.getId())
                 .then()
                 .statusCode(HTTP_OK);
     }
+
     public ValidatableResponse deleteDeviceIfExists(DeviceId deviceId) {
-        return  given().spec(requestSpec)
+        return given().spec(requestSpec)
                 .delete("/api/device/{deviceId}", deviceId.getId())
                 .then()
-                .statusCode(anyOf(is(HTTP_OK),is(HTTP_NOT_FOUND)));
+                .statusCode(anyOf(is(HTTP_OK), is(HTTP_NOT_FOUND)));
     }
 
     public ValidatableResponse postTelemetryAttribute(String entityType, DeviceId deviceId, String scope, JsonNode attribute) {
-        return  given().spec(requestSpec).body(attribute)
+        return given().spec(requestSpec).body(attribute)
                 .post("/api/plugins/telemetry/{entityType}/{entityId}/attributes/{scope}", entityType, deviceId.getId(), scope)
                 .then()
                 .statusCode(HTTP_OK);
     }
 
     public ValidatableResponse postAttribute(String accessToken, JsonNode attribute) {
-        return  given().spec(requestSpec).body(attribute)
+        return given().spec(requestSpec).body(attribute)
                 .post("/api/v1/{accessToken}/attributes/", accessToken)
                 .then()
                 .statusCode(HTTP_OK);
     }
 
     public JsonNode getAttributes(String accessToken, String clientKeys, String sharedKeys) {
-        return  given().spec(requestSpec)
+        return given().spec(requestSpec)
                 .queryParam("clientKeys", clientKeys)
                 .queryParam("sharedKeys", sharedKeys)
                 .get("/api/v1/{accessToken}/attributes", accessToken)
@@ -167,7 +186,8 @@ public class TestRestClient {
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()
-                .as(new TypeRef<PageData<RuleChain>>() {});
+                .as(new TypeRef<PageData<RuleChain>>() {
+                });
     }
 
     public RuleChain postRootRuleChain(RuleChain ruleChain) {
@@ -239,7 +259,8 @@ public class TestRestClient {
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()
-                .as(new TypeRef<List<EntityRelation>>() {});
+                .as(new TypeRef<List<EntityRelation>>() {
+                });
     }
 
     public JsonNode postServerSideRpc(DeviceId deviceId, JsonNode serverRpcPayload) {
@@ -252,8 +273,75 @@ public class TestRestClient {
                 .as(JsonNode.class);
     }
 
+    public DeviceProfile getDeviceProfileById(DeviceProfileId deviceProfileId) {
+        return given().spec(requestSpec).get("/api/deviceProfile/{deviceProfileId}", deviceProfileId.getId())
+                .then()
+                .assertThat()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(DeviceProfile.class);
+    }
+
+    public DeviceProfile postDeviceProfile(DeviceProfile deviceProfile) {
+        return given().spec(requestSpec).body(deviceProfile)
+                .post("/api/deviceProfile")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(DeviceProfile.class);
+    }
+
+    public OtaPackageInfo postOtaPackageInfo(OtaPackageInfo otaPackageInfo) {
+        return given().spec(requestSpec).body(otaPackageInfo)
+                .post("/api/otaPackage")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(OtaPackageInfo.class);
+    }
+
+    public OtaPackage postOtaPackage(OtaPackage otaPackage, File dataFile) {
+        MultiPartSpecification multiPartSpecification = new MultiPartSpecBuilder(dataFile)
+                .fileName(otaPackage.getFileName())
+                .mimeType("text/plain")
+                .controlName("file").build();
+        Map<String, String> params = new HashMap<>();
+        params.put("otaPackageId", otaPackage.getId().getId().toString());
+        params.put("checksum", otaPackage.getChecksum());
+        params.put("checksumAlgorithm", otaPackage.getChecksumAlgorithm().name());
+        return given().spec(requestSpec)
+                .multiPart(multiPartSpecification)
+                .contentType("multipart/form-data")
+                .accept(ContentType.JSON)
+                .pathParams(params)
+                .when()
+                .post("/api/otaPackage/{otaPackageId}?checksum={checksum}&checksumAlgorithm={checksumAlgorithm}")
+                .then()
+                .extract()
+                .as(OtaPackage.class);
+    }
+
+    public PageData<OtaPackageInfo> getOtaPackages(PageLink pageLink) {
+        Map<String, String> params = new HashMap<>();
+        addPageLinkToParam(params, pageLink);
+        return given().spec(requestSpec).queryParams(params)
+                .get("/api/otaPackages")
+                .then()
+                .statusCode(HTTP_OK)
+                .extract()
+                .as(new TypeRef<PageData<OtaPackageInfo>>() {
+                });
+    }
+
     public String getToken() {
         return token;
+    }
+
+    public ValidatableResponse deleteOtaPackage(OtaPackageId otaPackageId) {
+        return given().spec(requestSpec)
+                .delete("/api/otaPackage/{otaPackageId}", otaPackageId.getId())
+                .then()
+                .statusCode(HTTP_OK);
     }
 
     public String getRefreshToken() {

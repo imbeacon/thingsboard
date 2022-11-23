@@ -38,7 +38,7 @@ public class HttpClientTest extends AbstractContainerTest {
     @BeforeMethod
     public void setUp() throws Exception {
         testRestClient.login("tenant@thingsboard.org", "tenant");
-        device = testRestClient.postDevice("", defaultDevicePrototype("http_"));
+        device = testRestClient.postDevice(defaultDevicePrototype("http_"));
     }
 
     @AfterMethod
