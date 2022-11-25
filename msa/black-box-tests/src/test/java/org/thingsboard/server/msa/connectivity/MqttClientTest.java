@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2022 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.Data;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -65,9 +62,7 @@ import org.thingsboard.server.msa.mapper.AttributesResponse;
 import org.thingsboard.server.msa.mapper.WsTelemetryResponse;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
@@ -80,7 +75,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.thingsboard.server.common.data.DataConstants.DEVICE;
 import static org.thingsboard.server.common.data.DataConstants.SHARED_SCOPE;
@@ -390,19 +384,16 @@ public class MqttClientTest extends AbstractContainerTest {
         assertThat(fwChecksumAlgorithm).isEqualTo(testOtaPackage.getChecksumAlgorithm().name());
         assertThat(fwTag).isEqualTo(testOtaPackage.getTag());
 
-//        MqttMessageListener firmwareListener = new MqttMessageListener();
-
         mqttClient.on("v2/fw/response/+/chunk/+", listener, MqttQoS.AT_LEAST_ONCE);
 
         // Wait until subscription is processed
         TimeUnit.SECONDS.sleep(3 * timeoutMultiplier);
 
-        mqttClient.publish("v2/fw/request/0" + "/chunk/"+ testOtaPackage.getDataSize().toString(), Unpooled.wrappedBuffer("".getBytes()), MqttQoS.AT_LEAST_ONCE);
+        mqttClient.publish("v2/fw/request/0" + "/chunk/" + testOtaPackage.getDataSize().toString(), Unpooled.wrappedBuffer("".getBytes()), MqttQoS.AT_LEAST_ONCE);
 
         MqttEvent firmwareEvent = listener.events.poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
 
         assertThat(firmwareEvent).isNotNull();
-
         assertThat(firmwareEvent.getMessage().getBytes()).isEqualTo(testOtaPackage.getData().array());
 
     }
@@ -554,7 +545,6 @@ public class MqttClientTest extends AbstractContainerTest {
         firmwareData.setTag(firmwareData.getTitle() + " " + firmwareData.getVersion());
         firmwareData.setDeviceProfileId(deviceProfileId);
         OtaPackageInfo savedOtaPackageInfo = testRestClient.postOtaPackageInfo(firmwareData);
-//        firmwareData.setData(ByteBuffer.wrap(FileUtils.readFileToByteArray(testFirmwareFile)));
         firmwareData.setDataSize(testFirmwareFile.length());
         firmwareData.setHasData(true);
         firmwareData.setId(savedOtaPackageInfo.getId());
