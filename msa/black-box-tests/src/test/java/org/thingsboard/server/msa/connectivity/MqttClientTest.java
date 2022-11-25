@@ -80,6 +80,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.thingsboard.server.common.data.DataConstants.DEVICE;
 import static org.thingsboard.server.common.data.DataConstants.SHARED_SCOPE;
@@ -92,6 +93,7 @@ public class MqttClientTest extends AbstractContainerTest {
     private final static String TEST_PROVISION_DEVICE_SECRET = "test_provision_secret";
 
     private Device device;
+
     @BeforeMethod
     public void setUp() throws Exception {
         testRestClient.login("tenant@thingsboard.org", "tenant");
@@ -107,6 +109,7 @@ public class MqttClientTest extends AbstractContainerTest {
         }
 
     }
+
     @Test
     public void telemetryUpload() throws Exception {
         DeviceCredentials deviceCredentials = testRestClient.getDeviceCredentialsByDeviceId(device.getId());
@@ -358,10 +361,14 @@ public class MqttClientTest extends AbstractContainerTest {
         device = testRestClient.postDevice(device);
 
         // Wait for shared deleted message
-        listener.getEvents().poll(timeoutMultiplier, TimeUnit.SECONDS);
-        MqttEvent event = listener.getEvents().poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+        MqttEvent event = listener.getEvents().poll(timeoutMultiplier, TimeUnit.SECONDS);
 
         assertThat(event).isNotNull();
+
+        if (mapper.readTree(event.getMessage()).has("deleted")) {
+            event = listener.getEvents().poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+            assertThat(event).isNotNull();
+        }
 
         JsonNode jsonNode = mapper.readTree(event.getMessage());
 
@@ -383,9 +390,20 @@ public class MqttClientTest extends AbstractContainerTest {
         assertThat(fwChecksumAlgorithm).isEqualTo(testOtaPackage.getChecksumAlgorithm().name());
         assertThat(fwTag).isEqualTo(testOtaPackage.getTag());
 
+//        MqttMessageListener firmwareListener = new MqttMessageListener();
 
+        mqttClient.on("v2/fw/response/+/chunk/+", listener, MqttQoS.AT_LEAST_ONCE);
 
+        // Wait until subscription is processed
         TimeUnit.SECONDS.sleep(3 * timeoutMultiplier);
+
+        mqttClient.publish("v2/fw/request/0" + "/chunk/"+ testOtaPackage.getDataSize().toString(), Unpooled.wrappedBuffer("".getBytes()), MqttQoS.AT_LEAST_ONCE);
+
+        MqttEvent firmwareEvent = listener.events.poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+
+        assertThat(firmwareEvent).isNotNull();
+
+        assertThat(firmwareEvent.getMessage().getBytes()).isEqualTo(testOtaPackage.getData().array());
 
     }
 
@@ -503,7 +521,7 @@ public class MqttClientTest extends AbstractContainerTest {
         DeviceProfileProvisionConfiguration provisionConfiguration;
         String testProvisionDeviceKey = TEST_PROVISION_DEVICE_KEY;
         deviceProfile.setProvisionType(provisionType);
-        switch(provisionType) {
+        switch (provisionType) {
             case ALLOW_CREATE_NEW_DEVICES:
                 provisionConfiguration = new AllowCreateNewDevicesDeviceProfileProvisionConfiguration(TEST_PROVISION_DEVICE_SECRET);
                 break;
