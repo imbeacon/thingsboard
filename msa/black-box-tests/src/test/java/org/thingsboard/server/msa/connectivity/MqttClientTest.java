@@ -350,10 +350,14 @@ public class MqttClientTest extends AbstractContainerTest {
         device = testRestClient.postDevice(device);
 
         // Wait for shared deleted message
-        listener.getEvents().poll(timeoutMultiplier, TimeUnit.SECONDS);
-        MqttEvent event = listener.getEvents().poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+        MqttEvent event = listener.getEvents().poll(timeoutMultiplier, TimeUnit.SECONDS);
 
         assertThat(event).isNotNull();
+
+        if (mapper.readTree(event.getMessage()).has("deleted")) {
+            event = listener.getEvents().poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+            assertThat(event).isNotNull();
+        }
 
         JsonNode jsonNode = mapper.readTree(event.getMessage());
 
@@ -375,8 +379,17 @@ public class MqttClientTest extends AbstractContainerTest {
         assertThat(fwChecksumAlgorithm).isEqualTo(testOtaPackage.getChecksumAlgorithm().name());
         assertThat(fwTag).isEqualTo(testOtaPackage.getTag());
 
+        mqttClient.on("v2/fw/response/+/chunk/+", listener, MqttQoS.AT_LEAST_ONCE);
 
+        // Wait until subscription is processed
         TimeUnit.SECONDS.sleep(3 * timeoutMultiplier);
+
+        mqttClient.publish("v2/fw/request/0" + "/chunk/" + testOtaPackage.getDataSize().toString(), Unpooled.wrappedBuffer("".getBytes()), MqttQoS.AT_LEAST_ONCE);
+
+        MqttEvent firmwareEvent = listener.events.poll(10 * timeoutMultiplier, TimeUnit.SECONDS);
+
+        assertThat(firmwareEvent).isNotNull();
+        assertThat(firmwareEvent.getMessage().getBytes()).isEqualTo(testOtaPackage.getData().array());
 
     }
 
