@@ -24,10 +24,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import lombok.Data;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -43,11 +40,6 @@ import org.thingsboard.server.common.data.DeviceProfileProvisionType;
 import org.thingsboard.server.common.data.OtaPackage;
 import org.thingsboard.server.common.data.OtaPackageInfo;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.device.profile.AllowCreateNewDevicesDeviceProfileProvisionConfiguration;
-import org.thingsboard.server.common.data.device.profile.CheckPreProvisionedDevicesDeviceProfileProvisionConfiguration;
-import org.thingsboard.server.common.data.device.profile.DeviceProfileData;
-import org.thingsboard.server.common.data.device.profile.DeviceProfileProvisionConfiguration;
-import org.thingsboard.server.common.data.device.profile.DisabledDeviceProfileProvisionConfiguration;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -65,9 +57,7 @@ import org.thingsboard.server.msa.mapper.AttributesResponse;
 import org.thingsboard.server.msa.mapper.WsTelemetryResponse;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
@@ -92,6 +82,7 @@ public class MqttClientTest extends AbstractContainerTest {
     private final static String TEST_PROVISION_DEVICE_SECRET = "test_provision_secret";
 
     private Device device;
+
     @BeforeMethod
     public void setUp() throws Exception {
         testRestClient.login("tenant@thingsboard.org", "tenant");
@@ -107,6 +98,7 @@ public class MqttClientTest extends AbstractContainerTest {
         }
 
     }
+
     @Test
     public void telemetryUpload() throws Exception {
         DeviceCredentials deviceCredentials = testRestClient.getDeviceCredentialsByDeviceId(device.getId());
@@ -384,7 +376,6 @@ public class MqttClientTest extends AbstractContainerTest {
         assertThat(fwTag).isEqualTo(testOtaPackage.getTag());
 
 
-
         TimeUnit.SECONDS.sleep(3 * timeoutMultiplier);
 
     }
@@ -499,30 +490,6 @@ public class MqttClientTest extends AbstractContainerTest {
         assertThat(provisionResponse.get("status").asText()).isEqualTo("NOT_FOUND");
     }
 
-    private DeviceProfile updateDeviceProfileWithProvisioningStrategy(DeviceProfile deviceProfile, DeviceProfileProvisionType provisionType) {
-        DeviceProfileProvisionConfiguration provisionConfiguration;
-        String testProvisionDeviceKey = TEST_PROVISION_DEVICE_KEY;
-        deviceProfile.setProvisionType(provisionType);
-        switch(provisionType) {
-            case ALLOW_CREATE_NEW_DEVICES:
-                provisionConfiguration = new AllowCreateNewDevicesDeviceProfileProvisionConfiguration(TEST_PROVISION_DEVICE_SECRET);
-                break;
-            case CHECK_PRE_PROVISIONED_DEVICES:
-                provisionConfiguration = new CheckPreProvisionedDevicesDeviceProfileProvisionConfiguration(TEST_PROVISION_DEVICE_SECRET);
-                break;
-            default:
-            case DISABLED:
-                testProvisionDeviceKey = null;
-                provisionConfiguration = new DisabledDeviceProfileProvisionConfiguration(null);
-                break;
-        }
-        DeviceProfileData deviceProfileData = deviceProfile.getProfileData();
-        deviceProfileData.setProvisionConfiguration(provisionConfiguration);
-        deviceProfile.setProfileData(deviceProfileData);
-        deviceProfile.setProvisionDeviceKey(testProvisionDeviceKey);
-        return testRestClient.postDeviceProfile(deviceProfile);
-    }
-
     private OtaPackage createTestOtaPackage(DeviceProfileId deviceProfileId) throws Exception {
         File testFirmwareFile = ResourceUtils.getFile("classpath:data/test-firmware.txt");
         OtaPackage firmwareData = new OtaPackage();
@@ -536,7 +503,6 @@ public class MqttClientTest extends AbstractContainerTest {
         firmwareData.setTag(firmwareData.getTitle() + " " + firmwareData.getVersion());
         firmwareData.setDeviceProfileId(deviceProfileId);
         OtaPackageInfo savedOtaPackageInfo = testRestClient.postOtaPackageInfo(firmwareData);
-//        firmwareData.setData(ByteBuffer.wrap(FileUtils.readFileToByteArray(testFirmwareFile)));
         firmwareData.setDataSize(testFirmwareFile.length());
         firmwareData.setHasData(true);
         firmwareData.setId(savedOtaPackageInfo.getId());
