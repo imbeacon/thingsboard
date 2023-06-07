@@ -216,13 +216,10 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
     }
 
     @Override
-    public void unassignUserAlarms(TenantId tenantId, User user, long unassignTs) throws ThingsboardException {
+    public void unassignUserAlarms(TenantId tenantId, User user, long unassignTs) {
         AlarmQueryV2 alarmQuery = AlarmQueryV2.builder().assigneeId(user.getId()).pageLink(new TimePageLink(Integer.MAX_VALUE)).build();
         try {
             List<AlarmInfo> alarms = alarmService.findAlarmsV2(tenantId, alarmQuery).get(30, TimeUnit.SECONDS).getData();
-            if (alarms.isEmpty()) {
-                throw new ThingsboardException(ThingsboardErrorCode.ITEM_NOT_FOUND);
-            }
             for (AlarmInfo alarm : alarms) {
                 AlarmApiCallResult result = alarmSubscriptionService.unassignAlarm(tenantId, alarm.getId(), getOrDefault(unassignTs));
                 if (!result.isSuccessful()) {
@@ -243,8 +240,6 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
                         log.error("Failed to save alarm comment", e);
                     }
                     notificationEntityService.notifyCreateOrUpdateAlarm(result.getAlarm(), ActionType.ALARM_UNASSIGNED, user);
-                } else {
-                    throw new ThingsboardException("Alarm was already unassigned!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
                 }
             }
 
